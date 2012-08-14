@@ -1,0 +1,14 @@
+[  
+	{  
+	    "id": "tools",  
+	    "children":  
+	    [  
+	        {"id": "livecode-on"},  
+	        { "command": "livecode",
+	    		"args": {
+				    "execute": "on"
+				}
+			}  
+	    ]  
+	}  
+]  
