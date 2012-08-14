@@ -5,6 +5,7 @@ import time
 
 #view.run_command("livecode",{"execute":"on"})
 
+
 class LivecodeCommand(sublime_plugin.TextCommand):
 
     def __init__(self, view):
@@ -12,9 +13,9 @@ class LivecodeCommand(sublime_plugin.TextCommand):
         self.view = view
         self.running = False
 
-    def run(self, edit, execute = None):
+    def run(self, edit, execute=None):
         self.choose(execute, edit)
-        
+
     def choose(self, command, edit):
         if command == "on":
             self.turn_on(edit)
@@ -24,26 +25,26 @@ class LivecodeCommand(sublime_plugin.TextCommand):
     def turn_on(self, edit):
         if self.running == False:
             self.ws = create_connection("ws://echo.websocket.org/")
-            def run(*args):
-                self.send(edit)
-            thread.start_new_thread(run, ())
+            thread.start_new_thread(lambda: self.send(edit), ())
 
     def send(self, edit):
         self.running = True
+
         def sendbuffer(*args):
-            self.ws.send(self.view.substr(sublime.Region(0,self.view.size())));
+            view = sublime.active_window().active_view()
+            self.ws.send(view.substr(sublime.Region(0, view.size())))
+
         while self.running:
-            print "Sending 'Hello, World'..."
+            print "Sending buffer content..."
             sublime.set_timeout(sendbuffer, 1)
-            
             print "Sent"
-            print "Reeiving..."
-            result =  self.ws.recv()
-            print "Received '%s'" % result
+            #result = self.ws.recv()
+            #print "Received '%s'" % result
             time.sleep(5)
 
     def turn_off(self, edit):
         self.running = False
         self.ws.close()
+        time.sleep(1)
         self.ws = None
         print "Off"
