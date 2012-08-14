@@ -1,0 +1,20 @@
+{
+  "author": "Massimiliano Marcon <me@marcon.me> (http://marcon.me)",
+  "name": "livecode-server",
+  "description": "A HTTP server with Websocket support to stream live coding sessions from livecode for Sublime Text 2",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mmarcon/sublime-livecode.git"
+  },
+  "main": "server.js",
+  "dependencies": {
+    "ws": "0.4.x",
+    "express": "2.5.x"
+    },
+  "devDependencies": {},
+  "optionalDependencies": {},
+  "engines": {
+    "node": "*"
+  }
+}
