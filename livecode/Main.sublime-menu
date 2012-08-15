@@ -1,14 +1,29 @@
-[  
-	{  
-	    "id": "tools",  
-	    "children":  
-	    [  
-	        {"id": "livecode-on"},  
-	        { "command": "livecode",
-	    		"args": {
-				    "execute": "on"
-				}
-			}  
-	    ]  
-	}  
-]  
+[
+    {
+        "id": "tools",
+        "children": [
+            {
+                "id": "livecode",
+                "caption": "Livecode",
+                "children": [
+                    {
+                        "id": "enable",
+                        "caption": "Enable",
+                        "command": "livecode",
+                        "args": {
+                            "execute": "on"
+                        }
+                    },
+                    {
+                        "id": "disable",
+                        "caption": "Disable",
+                        "command": "livecode",
+                        "args": {
+                            "execute": "off"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+]

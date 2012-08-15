@@ -12,6 +12,7 @@ class LivecodeCommand(sublime_plugin.TextCommand):
         self.ws = None
         self.view = view
         self.running = False
+        self.buffer = None
 
     def run(self, edit, execute=None):
         self.choose(execute, edit)
@@ -24,22 +25,35 @@ class LivecodeCommand(sublime_plugin.TextCommand):
 
     def turn_on(self, edit):
         if self.running == False:
-            self.ws = create_connection("ws://echo.websocket.org/")
+            self.ws = create_connection("ws://localhost:8000")
+            self.ws.settimeout(800)
+            self.running = True
+            thread.start_new_thread(lambda: self.getbuffer(edit), ())
             thread.start_new_thread(lambda: self.send(edit), ())
 
-    def send(self, edit):
-        self.running = True
-
-        def sendbuffer(*args):
+    def getbuffer(self, edit):
+        print "*** ***"
+        def get_buffer_internal(*args):
+            print "Getting Buffer"
             view = sublime.active_window().active_view()
-            self.ws.send(view.substr(sublime.Region(0, view.size())))
+            self.buffer = view.substr(sublime.Region(0, view.size()));
+        
+        while self.running and self.ws.connected:
+            print "Other LOOP"
+            sublime.set_timeout(get_buffer_internal , 1)
+            time.sleep(6)
 
-        while self.running:
-            print "Sending buffer content..."
-            sublime.set_timeout(sendbuffer, 1)
-            print "Sent"
-            #result = self.ws.recv()
-            #print "Received '%s'" % result
+    def send(self, edit):
+        while self.running and self.ws.connected:
+            try :
+                print "LOOP"
+                if self.buffer != None:
+                    print "Sending buffer content..."
+                    self.ws.send(self.buffer)
+                    print "Sent"
+            except Exception, e:
+                print "Uhmmm... something wrong happened here..."
+                self.turn_off(edit)
             time.sleep(5)
 
     def turn_off(self, edit):

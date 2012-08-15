@@ -332,6 +332,10 @@ class WebSocket(object):
         """
         self.connected = False
         self.io_sock = self.sock = socket.socket()
+        """
+        I am making it non blocking. I am only sending anyway, so who cares?!
+        """
+        self.sock.setblocking(0)
         self.get_mask_key = get_mask_key
         
     def set_mask_key(self, func):
@@ -489,7 +493,12 @@ class WebSocket(object):
         if self.get_mask_key:
             frame.get_mask_key = self.get_mask_key
         data = frame.format()
-        self.io_sock.send(data)
+        
+        try:
+            self.io_sock.send(data)
+        except Exception, e:
+            self.connected = False
+        
         if traceEnabled:
             logger.debug("send: " + repr(data))
 
@@ -621,6 +630,9 @@ class WebSocket(object):
             except:
                 pass
         self._closeInternal()
+
+    # def connected(self):
+    #     return self.connected
 
     def _closeInternal(self):
         self.connected = False
