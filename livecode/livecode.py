@@ -32,7 +32,7 @@ class LivecodeCommand(sublime_plugin.TextCommand):
             ws = create_connection("ws://localhost:8000")
             ws.settimeout(800)
             while True:
-                print "Sending"
+                #this is blocking with no timeout
                 b = q.get(True, None)
                 ws.send(b)
 
