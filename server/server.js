@@ -22,11 +22,12 @@ var express = require('express'),
     app = express.createServer(),
     path = require('path'),
     WS = require('ws').Server,
-    chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz';
+    chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz',
+    sockets = [];
 
 var generateId = function(){
-        return 'test-' + Math.random().toFixed(3).replace(/\./, '') + '-' + Math.sqrt(Date.now()).toString().replace(/^\d+\./, '');
-    };
+    return 'ws-' + Math.random().toFixed(3).replace(/\./, '') + '-' + Math.sqrt(Date.now()).toString().replace(/^\d+\./, '');
+};
 
 app.use(express.bodyParser());
 app.listen(8000);
@@ -35,7 +36,27 @@ app.use(express.static(path.normalize(__dirname + '/app/')));
 var wss = new WS({server: app});
 wss.on('connection', function(ws) {
     console.log('WS Connected');
+    var id = generateId();
+    ws.localId = id;
+    sockets.push(ws);
     ws.on('message', function(message) {
-        console.log(message);
+        var t = this;
+        sockets.forEach(function(v){
+            if(t.localId !== v.localId) {
+                v.send(message);
+            }
+        });
+    });
+    ws.on('close', function() {
+        console.log('WS disconnected');
+        var index, t = this;
+        sockets.forEach(function(v,i){
+            if(t.localId === v.localId) {
+                index = i;
+            }
+        });
+        if (index) {
+            sockets.splice(index,1);
+        }
     });
 });
