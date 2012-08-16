@@ -1,4 +1,4 @@
-(function(){
+(function($){
     'use strict';
     var ws, onopen, onmessage, onclose, onerror, target = $('#livecode code');
 
@@ -15,7 +15,7 @@
     };
 
     onmessage = function(e){
-        target.text(e.data);  
+        target.text($.trim(e.data));  
     };
 
     $(function(){
@@ -25,4 +25,4 @@
         ws.onclose = onclose;
         ws.onerror = onerror;
     });
-})();
+})(jQuery);
