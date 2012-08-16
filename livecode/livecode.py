@@ -3,6 +3,7 @@ from websocket import create_connection
 import thread
 import time
 import multiprocessing
+import json
 
 #view.run_command("livecode",{"execute":"on"})
 
@@ -46,12 +47,13 @@ class LivecodeCommand(sublime_plugin.TextCommand):
         def get_buffer_internal(*args):
             print "Getting Buffer"
             view = sublime.active_window().active_view()
-            self.queue.put(view.substr(sublime.Region(0, view.size())))
+            obj = {"code": view.substr(sublime.Region(0, view.size())), "file":view.file_name()}
+            self.queue.put(json.dumps(obj))
         
         while self.running:
             print "Other LOOP"
             sublime.set_timeout(get_buffer_internal , 1)
-            time.sleep(3)
+            time.sleep(1)
 
     def turn_off(self, edit):
         self.running = False

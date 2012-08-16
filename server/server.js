@@ -23,10 +23,19 @@ var express = require('express'),
     path = require('path'),
     WS = require('ws').Server,
     chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz',
-    sockets = [];
+    sockets = {};
 
 var generateId = function(){
     return 'ws-' + Math.random().toFixed(3).replace(/\./, '') + '-' + Math.sqrt(Date.now()).toString().replace(/^\d+\./, '');
+},
+getAllExcept = function(object, key){
+    var result = [], k;
+    for (k in object) {
+        if (object.hasOwnProperty(k) && key !== k) {
+            result.push(object[k]);
+        }
+    }
+    return result;
 };
 
 app.use(express.bodyParser());
@@ -37,26 +46,20 @@ var wss = new WS({server: app});
 wss.on('connection', function(ws) {
     console.log('WS Connected');
     var id = generateId();
-    ws.localId = id;
-    sockets.push(ws);
+    ws._id = id;
+    sockets[id] = ws;
     ws.on('message', function(message) {
-        var t = this;
-        sockets.forEach(function(v){
-            if(t.localId !== v.localId) {
+        var others = getAllExcept(sockets, this._id);
+
+        others.forEach(function(v){
+            try {
                 v.send(message);
+            } catch(e) {
+                console.log('Failed to send message to socket: ' + v._id);
             }
         });
     });
     ws.on('close', function() {
-        console.log('WS disconnected');
-        var index, t = this;
-        sockets.forEach(function(v,i){
-            if(t.localId === v.localId) {
-                index = i;
-            }
-        });
-        if (index) {
-            sockets.splice(index,1);
-        }
+        delete sockets[ws._id];
     });
 });
